@@ -33,7 +33,7 @@ module Octobox
     def scopes
       default_scopes = 'notifications'
       default_scopes += ', read:org' if Octobox.restricted_access_enabled?
-      default_scopes += ', repo'     if !github_app && fetch_subject
+      default_scopes += ', public_repo' if !github_app && fetch_subject
 
       ENV.fetch('GITHUB_SCOPE', default_scopes)
     end

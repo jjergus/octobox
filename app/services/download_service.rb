@@ -37,6 +37,7 @@ class DownloadService
   def fetch_notifications(params: {}, max_results: Octobox.config.max_notifications_to_sync)
     client = page_limiting_client
     params[:max_results] = max_results
+    params[:since] = "2019-09-01T00:00:00Z"
     client.notifications(params)
   end
 
@@ -58,6 +59,9 @@ class DownloadService
     eager_load_relation = Octobox.config.subjects_enabled? ? [:subject, :repository, :app_installation] : nil
     existing_notifications = user.notifications.includes(eager_load_relation).where(github_id: notifications.map(&:id))
     notifications.each do |notification|
+      next unless (notification.repository.owner.login == "hhvm" or
+        (notification.repository.owner.login == "facebook" and notification.repository.name == "hhvm"))
+
       n = existing_notifications.find{|en| en.github_id == notification.id.to_i}
       n = user.notifications.new(github_id: notification.id, archived: false) if n.nil?
       next unless n
